@@ -5,6 +5,8 @@ window.SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecogn
 const synth = window.speechSynthesis;
 
 const recognition = new SpeechRecognition();
+recognition.lang = 'en-US';
+let voices;
 const icon = document.querySelector('img.fa.fa-microphone');
 let paragraph = document.createElement('p');
 let container = document.querySelector('.text-box');
@@ -12,16 +14,19 @@ container.appendChild(paragraph);
 const sound = document.querySelector('.sound');
 
 icon.addEventListener('click', () => {
+    document.querySelector('img.fa.fa-microphone').src = './speak.png';
     sound.play();
+    voices = synth.getVoices();
+    console.log(voices);
     dictate();
 });
-const dictate = () => {
+const dictate = voices => {
   recognition.start();
   recognition.onresult = event => {
       const speechToText = event.results[0][0].transcript;
-      paragraph.textContent = speechToText;
-      console.log(event.results);
+      paragraph.textContent = paragraph.textContent.concat(' ', speechToText);
       if(event.results[0].isFinal) {
+          document.querySelector('img.fa.fa-microphone').src = './dontSpeak.png';
           if (speechToText.includes('what is the time')) {
               speak(getTime);
           } else if (speechToText.includes('what is today\'s date')) {
@@ -37,6 +42,7 @@ const dictate = () => {
 
 const speak = action => {
     const utterThis = new SpeechSynthesisUtterance(action());
+    utterThis.voice = voices[27];
     synth.speak(utterThis);
 };
 
